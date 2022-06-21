@@ -1,0 +1,27 @@
+{
+  "version": "0.0.0",
+     "name": "machine",
+
+  "scripts":
+  {
+    "test": "npm run ts && npm run dts",
+    "ts":   "tsc",
+    "dts":  "dtslint --expectOnly --localTs ./node_modules/typescript/lib test/"
+  },
+
+  "dependencies":
+  {
+  },
+
+  "devDependencies":
+  {
+    "machine":
+      "./",
+
+    "typescript":
+      "4.7.4",
+
+    "dtslint":
+      "4.2.1"
+  }
+}

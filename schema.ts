@@ -15,6 +15,7 @@ export type States_Map_Empty = {}
 
 export type States_Data <T> = T extends States<infer Map> ? Map : never
 export type States_Keys <T> = T extends States<infer Map> ? keyof Map : never
+export type States_Values <T extends States<any>> = ReturnType<States_Data<T>[ States_Keys<T> ]['enter']>
 
 export type States <States_Map extends States_Map_Base> =
 {
@@ -97,7 +98,15 @@ export type Paths_Item = { [ dst: Key_Base ]: true }
 export type Paths_Map_Base = { [ src: Key_Base ]: Paths_Item }
 export type Paths_Map_Empty = {}
 
-export type Paths_Data <T> = T extends Paths<any, infer Map> ? Map : never
+export type Paths_Base <P extends Paths<any, any>> = P extends Paths<infer Base, any> ? Base : never
+export type Paths_Data <P extends Paths<any, any>> = P extends Paths<any,  infer Map> ? Map  : never
+export type Paths_Possible
+<
+	P extends Paths<any, any>,
+	Src extends States_Keys<Paths_Base<P>>,
+	Dst  extends States_Keys<Paths_Base<P>>,
+>
+= Paths_Data<P>[Src][Dst] extends true ? true : false
 
 export type Paths <Base extends States<any>, Path extends Paths_Map_Base> =
 {
@@ -188,7 +197,10 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 }
 
 
-type Schema <S extends States<any>, P extends Paths<S, any>> =
+export type Schema_States <Sc extends Schema<any, any>> = Sc extends Schema<infer States, any> ? States : never
+export type Schema_Paths  <Sc extends Schema<any, any>> = Sc extends Schema<any,  infer Paths> ? Paths  : never
+
+export type Schema <S extends States<any>, P extends Paths<S, any>> =
 {
 	state
 	<
@@ -217,7 +229,7 @@ type Schema <S extends States<any>, P extends Paths<S, any>> =
 	>
 	(src: Src, dst: Dst)
 	:
-		Paths_Data<P>[Src][Dst] extends true
+		Paths_Possible<P, Src, Dst> extends true
 		?
 			never
 		:

@@ -1,9 +1,8 @@
 // eslint-disable max-len
 
-// import * as Machine from 'machine'
 import { States } from 'machine'
 import { Paths }  from 'machine'
-import { Schema }  from 'machine'
+import { Schema } from 'machine'
 
 const
 s0 = States()

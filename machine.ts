@@ -1,8 +1,19 @@
+// eslint-disable max-len
 
 export type Key_Base = string
-export type States_Map_Base  = { [ key: Key_Base ]: (...args: any[]) => any }
+
+export type Enter_Fn <Args extends unknown[], Target> = (...args: Args) => Target
+export type Leave_Fn = () => void
+export type State_Dscr <Args extends unknown[], Target> =
+{
+	enter:  Enter_Fn<Args, Target>,
+	leave?: Leave_Fn,
+}
+
+export type States_Map_Base  = { [ key: Key_Base ]: State_Dscr<any[], any> }
 export type States_Map_Empty = {}
 
+export type States_Data <T> = T extends States<infer Map> ? Map : never
 export type States_Keys <T> = T extends States<infer Map> ? keyof Map : never
 
 export type States <States_Map extends States_Map_Base> =
@@ -13,13 +24,13 @@ export type States <States_Map extends States_Map_Base> =
 		Args extends unknown[],
 		Target,
 	>
-	(key: Key, fn: (...args: Args) => Target)
+	(key: Key, enter_fn: Enter_Fn<Args, Target>, leave_fn?: Leave_Fn)
 	:
 		Key extends keyof States_Map
 		?
 			never
 		:
-			States<States_Map & { [ key in Key ]: (...args: Args) => Target }>,
+			States<States_Map & { [ key in Key ]: State_Dscr<Args, Target> }>,
 
 	keys (): Key_Base[],
 
@@ -43,14 +54,22 @@ export function States (states: States_Map_Base = Object.create(null)): States<S
 		get,
 	}
 
-	function add (key: Key_Base, fn: (...args: unknown[]) => unknown)
+	function add (
+		key: Key_Base,
+		enter_fn:  (...args: unknown[]) => unknown,
+		leave_fn?: () => void
+	)
 	{
 		if (has(key))
 		{
 			throw new TypeError('state_taken_already')
 		}
 
-		return States({ ...states, [ key ]: fn })
+		return States({ ...states, [ key ]:
+		{
+			enter: enter_fn,
+			leave: leave_fn,
+		}})
 	}
 
 	function keys ()
@@ -77,6 +96,8 @@ export function States (states: States_Map_Base = Object.create(null)): States<S
 export type Paths_Item = { [ dst: Key_Base ]: true }
 export type Paths_Map_Base = { [ src: Key_Base ]: Paths_Item }
 export type Paths_Map_Empty = {}
+
+export type Paths_Data <T> = T extends Paths<any, infer Map> ? Map : never
 
 export type Paths <Base extends States<any>, Path extends Paths_Map_Base> =
 {
@@ -169,46 +190,61 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 
 type Schema <S extends States<any>, P extends Paths<S, any>> =
 {
-	/*
 	state
-
-	()
-
-	add
 	<
 		Key extends Key_Base,
 		Args extends unknown[],
 		Target,
 	>
-	(key: Key, fn: (...args: Args) => Target)
+	(key: Key, enter_fn: Enter_Fn<Args, Target>, leave_fn?: Leave_Fn)
 	:
-		Key extends keyof States_Map
+		Key extends States_Keys<S>
 		?
 			never
 		:
-			States<States_Map & { [ key in Key ]: (...args: Args) => Target }>,
-			*/
+			Schema<
+				   States<States_Data<S> & { [ key in Key ]: State_Dscr<Args, Target> }>,
+				Paths<
+					States<States_Data<S> & { [ key in Key ]: State_Dscr<Args, Target> }>,
+					Paths_Data<P>
+				>
+			>,
 
-	// state (...args: Parameters<S['add']>): Schema<>
+	path
+	<
+		Src extends States_Keys<S>,
+		Dst extends States_Keys<S>,
+	>
+	(src: Src, dst: Dst)
+	:
+		Paths_Data<P>[Src][Dst] extends true
+		?
+			never
+		:
+			Schema<S, Paths<S, Paths_Data<P> & { [ src in Src ]: { [ dst in Dst ]: true } }>>,
 }
 
 
-export default function Schema <S extends States<any>, P extends Paths<S, any>> (states: S, paths: P)
+export function Schema <S extends States<any>, P extends Paths<S, any>> (states: S = States() as any, paths: P = Paths(states) as any)
 : Schema<States<States_Map_Empty>, Paths<States<States_Map_Empty>, Paths_Map_Empty>>
 {
-	const $ = {}
-
-	/*
-	function state (key: Key_Base, fn: (...args: unknown[]) => unknown)
+	const $ =
 	{
-		return Schema(states.add(key, fn), paths)
+		state,
+		path,
 	}
 
-	function path (src: Key_Base, dst: Key_Base)
+	function state (key: Key_Base, enter_fn: Enter_Fn<unknown[], unknown>, leave_fn?: Leave_Fn)
 	{
-		return Schema(states, paths.add(key, fn))
+		const states_new = states.add(key, enter_fn, leave_fn)
+		const paths_new  = paths.rebase(states_new)
+		return Schema(states_new, paths_new)
 	}
-	*/
+
+	function path (src: States_Keys<S>, dst: States_Keys<S>)
+	{
+		return Schema(states, paths.add(src, dst))
+	}
 
 	return ($ as any)
 }

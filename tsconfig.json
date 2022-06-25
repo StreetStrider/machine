@@ -6,7 +6,7 @@
 	"exclude":
 	[
 		"release/",
-		"test/"
+		"**/*.typetest.ts"
 	],
 	"compilerOptions":
 	{

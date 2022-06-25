@@ -1,7 +1,7 @@
 {
 	"include":
 	[
-		"**/*.test.ts"
+		"**/*.typetest.ts"
 	],
 	"compilerOptions":
 	{

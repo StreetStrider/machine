@@ -4,9 +4,10 @@
 
   "scripts":
   {
-    "test": "npm run ts && npm run dts",
+    "test": "npm run ts && npm run dts && npm run unit",
     "ts":   "tsc",
-    "dts":  "dtslint --expectOnly --localTs ./node_modules/typescript/lib test/"
+    "dts":  "dtslint --expectOnly --localTs ./node_modules/typescript/lib test/",
+    "unit": "ts-mocha test/*.case.ts"
   },
 
   "dependencies":
@@ -22,6 +23,21 @@
       "4.7.4",
 
     "dtslint":
-      "4.2.1"
+      "4.2.1",
+
+    "mocha":
+      "8.4",
+
+    "ts-mocha":
+      "10.0",
+
+    "@types/mocha":
+      "9.1.1",
+
+    "chai":
+      "4.3",
+
+    "@types/chai":
+      "4.3"
   }
 }

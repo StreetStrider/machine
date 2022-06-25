@@ -33,7 +33,8 @@ export type States <States_Map extends States_Map_Base> =
 		:
 			States<States_Map & { [ key in Key ]: State_Dscr<Args, Target> }>,
 
-	keys (): Key_Base[],
+	keys ()
+	: readonly (keyof States_Map)[],
 
 	has <Key extends Key_Base> (key: Key)
 	:
@@ -98,6 +99,9 @@ export type Paths_Item = { [ dst: Key_Base ]: true }
 export type Paths_Map_Base = { [ src: Key_Base ]: Paths_Item }
 export type Paths_Map_Empty = {}
 
+export type Paths_Pair = [ Key_Base, Key_Base ]
+export type Paths_Seq  = Paths_Pair[]
+
 export type Paths_Base <P extends Paths<any, any>> = P extends Paths<infer Base, any> ? Base : never
 export type Paths_Data <P extends Paths<any, any>> = P extends Paths<any,  infer Map> ? Map  : never
 export type Paths_Possible
@@ -123,6 +127,9 @@ export type Paths <Base extends States<any>, Path extends Paths_Map_Base> =
 		:
 			Paths<Base, Path & { [ src in Src ]: { [ dst in Dst ]: true } }>,
 
+	keys ()
+	: Paths_Seq[],
+
 	has
 	<
 		Src extends Key_Base,
@@ -143,14 +150,12 @@ export type Paths <Base extends States<any>, Path extends Paths_Map_Base> =
 }
 
 
-export type Paths_Pair = [ Key_Base, Key_Base ]
-export type Paths_Seq  = Paths_Pair[]
-
 export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq = []): Paths<Base, Paths_Map_Empty>
 {
 	const $ =
 	{
 		add,
+		keys,
 		has,
 		rebase,
 	}
@@ -162,6 +167,11 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 		if (has(src, dst))   throw new TypeError('path_taken_already')
 
 		return Paths(base, [ ...paths, [ src, dst ] ])
+	}
+
+	function keys ()
+	{
+		return paths
 	}
 
 	function has (src: Key_Base, dst: Key_Base)
@@ -188,9 +198,9 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 			{
 				return false
 			}
-
-			return true
 		}
+
+		return true
 	}
 
 	return ($ as any)

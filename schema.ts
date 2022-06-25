@@ -200,8 +200,19 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 export type Schema_States <Sc extends Schema<any, any>> = Sc extends Schema<infer States, any> ? States : never
 export type Schema_Paths  <Sc extends Schema<any, any>> = Sc extends Schema<any,  infer Paths> ? Paths  : never
 
+export type Schema_Enter
+<
+	Sc extends Schema<any, any>,
+	Key extends States_Keys<Schema_States<Sc>>,
+>
+=
+	States_Data<Schema_States<Sc>>[Key]['enter']
+
 export type Schema <S extends States<any>, P extends Paths<S, any>> =
 {
+	states: S,
+	paths: P,
+
 	state
 	<
 		Key extends Key_Base,
@@ -242,6 +253,8 @@ export function Schema <S extends States<any>, P extends Paths<S, any>> (states:
 {
 	const $ =
 	{
+		states,
+		paths,
 		state,
 		path,
 	}

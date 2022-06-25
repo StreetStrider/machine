@@ -21,30 +21,34 @@ machine // $ExpectType Machine<Schema<States<{ A: State_Dscr<[n: number], number
 type M = typeof machine
 
 machine.go('A') // $ExpectError
-machine.go('A', 17) // $ExpectType void
 machine.go('D') // $ExpectError
+machine.go('A', 17) // $ExpectType void
 
 machine.can('A') // $ExpectType boolean
 machine.can('D') // $ExpectError
 
-machine.key // $ExpectType "A" | "B" | "C"
+machine.key   // $ExpectType "A" | "B" | "C"
 machine.state // $ExpectType number | void
 
-machine.when('A', (x) =>
+const w1 = machine.when('A', (x) =>
 {
 	x // $ExpectType number
+	return x ** 2
 })
+w1 // $ExpectType number | undefined
 
-machine.when('B', (x) =>
+const w2 = machine.when('B', (x) =>
 {
 	x // $ExpectType void
+	return false
 })
+w2 // $ExpectType boolean | undefined
 
 function refined (machine: M)
 {
 	if (machine.is('A'))
 	{
-		machine.key // $ExpectType "A"
+		machine.key   // $ExpectType "A"
 		machine.state // $ExpectType number
 	}
 }
@@ -53,6 +57,6 @@ function guarded (machine: M)
 {
 	machine.must('A')
 
-	machine.key // $ExpectType "A"
+	machine.key   // $ExpectType "A"
 	machine.state // $ExpectType number
 }

@@ -30,10 +30,23 @@ machine.can('D') // $ExpectError
 machine.key // $ExpectType "A" | "B" | "C"
 machine.state // $ExpectType number | void
 
-if (machine.is('A'))
+machine.when('A', (x) =>
 {
-	machine.key // $ExpectType "A"
-	machine.state // $ExpectType number
+	x // $ExpectType number
+})
+
+machine.when('B', (x) =>
+{
+	x // $ExpectType void
+})
+
+function refined (machine: M)
+{
+	if (machine.is('A'))
+	{
+		machine.key // $ExpectType "A"
+		machine.state // $ExpectType number
+	}
 }
 
 function guarded (machine: M)

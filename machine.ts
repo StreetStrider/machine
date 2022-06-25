@@ -37,6 +37,7 @@ export interface Machine <Sc extends Schema<any, any>>
 	state: States_Values<Schema_States<Sc>>,
 	is <Key extends States_Keys<Schema_States<Sc>>> (key: Key): this is Machine_Narrow<this, Key>,
 	must <Key extends States_Keys<Schema_States<Sc>>> (key: Key): asserts this is Machine_Narrow<this, Key>,
+	when <Key extends States_Keys<Schema_States<Sc>>> (key: Key, fn: (state: ReturnType<States_Data<Schema_States<Sc>>[Key]['enter']>) => void): void,
 }
 
 export function Machine

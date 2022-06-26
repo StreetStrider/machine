@@ -1,3 +1,5 @@
+// TODO: machine final? or explicit end state ($leave)
+// TODO: single arg state.add
 // eslint-disable max-len
 
 import { Key_Base } from './schema'

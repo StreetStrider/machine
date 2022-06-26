@@ -67,6 +67,10 @@ const
 p_e2 = p0.add('c', 'b') // $ExpectError
 
 const
+p_e3 = p0.add('a', 'b').add('a', 'b')
+p_e3 // $ExpectType never
+
+const
 p_ab_ba = p_ab.add('b', 'a')
 p_ab_ba // $ExpectType Paths<States<{ a: State_Dscr<[], number>; } & { b: State_Dscr<[b: number], string>; }>, { a: { b: true; }; } & { b: { a: true; }; }>
 

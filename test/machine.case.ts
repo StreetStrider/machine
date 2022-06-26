@@ -1,4 +1,6 @@
 
+import { States }  from 'machine'
+
 import { Schema }  from 'machine'
 import { Machine } from 'machine'
 
@@ -39,7 +41,7 @@ describe('Machine', () =>
 		}
 	})
 
-	it('works', () =>
+	it('positive', () =>
 	{
 		const order: string[] = []
 		function record (x: string, val?: any)
@@ -72,8 +74,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw()
-		expect(() => machine.must('C')).throw()
+		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
 
 		machine.go('B')
 		expect(machine.key).eq('B')
@@ -81,9 +83,9 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.is)).deep.eq([ false, true, false ])
 		expect(schema.states.keys().map(machine.can)).deep.eq([ false, false, true ])
 
-		expect(() => machine.must('A')).throw()
+		expect(() => machine.must('A')).throw(TypeError, 'wrong_machine_state')
 		expect(machine.must('B')).eq(undefined)
-		expect(() => machine.must('C')).throw()
+		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
 
 		machine.go('C')
 		expect(machine.key).eq('C')
@@ -91,8 +93,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.is)).deep.eq([ false, false, true ])
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, false, false ])
 
-		expect(() => machine.must('A')).throw()
-		expect(() => machine.must('B')).throw()
+		expect(() => machine.must('A')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
 		expect(machine.must('C')).eq(undefined)
 
 		machine.go('A')
@@ -102,8 +104,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw()
-		expect(() => machine.must('C')).throw()
+		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
 
 		machine.go('A')
 		expect(machine.key).eq('A')
@@ -112,8 +114,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw()
-		expect(() => machine.must('C')).throw()
+		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
 
 		expect(order).deep.eq(
 		[
@@ -134,5 +136,89 @@ describe('Machine', () =>
 
 		const w_B = machine.when('B', (state) => state + 100)
 		expect(w_B).eq(undefined)
+	})
+
+	it('negative', () =>
+	{
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			.state('A', (n: number) => n + 1)
+		})
+		.throw(TypeError, 'state_taken_already')
+
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			// @ts-ignore
+			.states.get('B')
+		})
+		.throw(TypeError, 'wrong_key')
+
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			// @ts-ignore
+			.path('B', 'A')
+		})
+		.throw(TypeError, 'wrong_src')
+
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			// @ts-ignore
+			.path('A', 'B')
+		})
+		.throw(TypeError, 'wrong_dst')
+
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			.state('B', () => {})
+			.path('A', 'B')
+			.path('A', 'B')
+		})
+		.throw(TypeError, 'path_taken_already')
+
+		expect(() =>
+		{
+			Schema()
+			.state('A', () => {})
+			.state('B', () => {})
+			.path('A', 'B')
+			.paths.rebase(States())
+		})
+		.throw(TypeError, 'wrong_base')
+
+		expect(() =>
+		{
+			const schema = Schema()
+			.state('A', () => {})
+			.state('B', () => {})
+			.path('A', 'B')
+
+			// @ts-ignore
+			const machine = Machine(schema, 'C')
+		})
+		.throw(TypeError, 'wrong_key')
+
+		expect(() =>
+		{
+			const schema = Schema()
+			.state('A', () => {})
+			.state('B', () => {})
+			.path('A', 'B')
+
+			const machine = Machine(schema, 'A')
+
+			// @ts-ignore
+			machine.go('C')
+		})
+		.throw(TypeError, 'wrong_key')
 	})
 })

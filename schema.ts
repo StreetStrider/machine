@@ -104,13 +104,6 @@ export type Paths_Seq  = Paths_Pair[]
 
 export type Paths_Base <P extends Paths<any, any>> = P extends Paths<infer Base, any> ? Base : never
 export type Paths_Data <P extends Paths<any, any>> = P extends Paths<any,  infer Map> ? Map  : never
-export type Paths_Possible
-<
-	P extends Paths<any, any>,
-	Src extends States_Keys<Paths_Base<P>>,
-	Dst  extends States_Keys<Paths_Base<P>>,
->
-= Paths_Data<P>[Src][Dst] extends true ? true : false
 
 export type Paths <Base extends States<any>, Path extends Paths_Map_Base> =
 {
@@ -250,7 +243,7 @@ export type Schema <S extends States<any>, P extends Paths<S, any>> =
 	>
 	(src: Src, dst: Dst)
 	:
-		Paths_Possible<P, Src, Dst> extends true
+		Paths_Data<P>[Src][Dst] extends true
 		?
 			never
 		:

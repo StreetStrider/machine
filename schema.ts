@@ -86,7 +86,7 @@ export function States (states: States_Map_Base = Object.create(null)): States<S
 
 	function get (key: Key_Base)
 	{
-		if (! has(key)) throw new TypeError('wrong_key')
+		if (! has(key)) throw new TypeError('state_missing')
 
 		return states[key]
 	}
@@ -155,8 +155,8 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 
 	function add (src: Key_Base, dst: Key_Base)
 	{
-		if (! base.has(src)) throw new TypeError('wrong_src')
-		if (! base.has(dst)) throw new TypeError('wrong_dst')
+		if (! base.has(src)) throw new TypeError('path_wrong_src')
+		if (! base.has(dst)) throw new TypeError('path_wrong_dst')
 		if (has(src, dst))   throw new TypeError('path_taken_already')
 
 		return Paths(base, [ ...paths, [ src, dst ] ])
@@ -174,7 +174,7 @@ export function Paths <Base extends States<any>> (base: Base, paths: Paths_Seq =
 
 	function rebase (base_new: States<any>)
 	{
-		if (! based_on(base_new, base)) throw new TypeError('wrong_base')
+		if (! based_on(base_new, base)) throw new TypeError('path_wrong_base')
 
 		return Paths(base_new, paths)
 	}

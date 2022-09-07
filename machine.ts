@@ -42,14 +42,14 @@ type Machine_Concrete <Key, State> =
 
 export interface Machine <Sc extends Schema<any, any>>
 {
-	key: States_Keys<Schema_States<Sc>>,
+	key:   States_Keys<Schema_States<Sc>>,
 	state: States_Values<Schema_States<Sc>>,
 
-	is <Key extends States_Keys<Schema_States<Sc>>> (key: Key): this is Machine_Narrow<this, Key>,
+	is   <Key extends States_Keys<Schema_States<Sc>>> (key: Key): this is Machine_Narrow<this, Key>,
 	must <Key extends States_Keys<Schema_States<Sc>>> (key: Key): asserts this is Machine_Narrow<this, Key>,
 
-	can <Key extends States_Keys<Schema_States<Sc>>> (key: Key): boolean,
-	go  <Key extends States_Keys<Schema_States<Sc>>> (key: Key, ...args: Parameters<Schema_Enter<Sc, Key>>): void,
+	can  <Key extends States_Keys<Schema_States<Sc>>> (key: Key): boolean,
+	go   <Key extends States_Keys<Schema_States<Sc>>> (key: Key, ...args: Parameters<Schema_Enter<Sc, Key>>): void,
 
 	when <Key extends States_Keys<Schema_States<Sc>>, P> (key: Key, fn: (state: ReturnType<Schema_Enter<Sc, Key>>) => P): P | undefined,
 }
@@ -64,9 +64,11 @@ export function Machine
 :
 	Machine<Sc>
 {
+	if (! schema.states.has(key as any)) throw new TypeError('machine_wrong_init')
+
 	const $ =
 	{
-		key: null as any,
+		key:   null as any,
 		state: null as any,
 
 		is,
@@ -84,7 +86,7 @@ export function Machine
 
 	function must (key: Key)
 	{
-		if (! is(key)) throw new TypeError('wrong_machine_state')
+		if (! is(key)) throw new TypeError('machine_wrong_state')
 	}
 
 	function can (key: Key)
@@ -94,6 +96,9 @@ export function Machine
 
 	function go (key: Key, ...args: Parameters<Schema_Enter<Sc, Key>>)
 	{
+		if (! schema.states.has(key as any)) throw new TypeError('machine_wrong_dst')
+		if (! can(key)) throw new TypeError('machine_impossible_path')
+
 		$leave($.key)
 		$enter(key, ...args)
 	}

@@ -74,8 +74,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
-		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('B')).throw(TypeError, 'machine_wrong_state')
+		expect(() => machine.must('C')).throw(TypeError, 'machine_wrong_state')
 
 		machine.go('B')
 		expect(machine.key).eq('B')
@@ -83,9 +83,9 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.is)).deep.eq([ false, true, false ])
 		expect(schema.states.keys().map(machine.can)).deep.eq([ false, false, true ])
 
-		expect(() => machine.must('A')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('A')).throw(TypeError, 'machine_wrong_state')
 		expect(machine.must('B')).eq(undefined)
-		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('C')).throw(TypeError, 'machine_wrong_state')
 
 		machine.go('C')
 		expect(machine.key).eq('C')
@@ -93,8 +93,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.is)).deep.eq([ false, false, true ])
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, false, false ])
 
-		expect(() => machine.must('A')).throw(TypeError, 'wrong_machine_state')
-		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('A')).throw(TypeError, 'machine_wrong_state')
+		expect(() => machine.must('B')).throw(TypeError, 'machine_wrong_state')
 		expect(machine.must('C')).eq(undefined)
 
 		machine.go('A')
@@ -104,8 +104,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
-		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('B')).throw(TypeError, 'machine_wrong_state')
+		expect(() => machine.must('C')).throw(TypeError, 'machine_wrong_state')
 
 		machine.go('A')
 		expect(machine.key).eq('A')
@@ -114,8 +114,8 @@ describe('Machine', () =>
 		expect(schema.states.keys().map(machine.can)).deep.eq([ true, true, false ])
 
 		expect(machine.must('A')).eq(undefined)
-		expect(() => machine.must('B')).throw(TypeError, 'wrong_machine_state')
-		expect(() => machine.must('C')).throw(TypeError, 'wrong_machine_state')
+		expect(() => machine.must('B')).throw(TypeError, 'machine_wrong_state')
+		expect(() => machine.must('C')).throw(TypeError, 'machine_wrong_state')
 
 		expect(order).deep.eq(
 		[
@@ -155,7 +155,7 @@ describe('Machine', () =>
 			// @ts-ignore
 			.states.get('B')
 		})
-		.throw(TypeError, 'wrong_key')
+		.throw(TypeError, 'state_missing')
 
 		expect(() =>
 		{
@@ -164,7 +164,7 @@ describe('Machine', () =>
 			// @ts-ignore
 			.path('B', 'A')
 		})
-		.throw(TypeError, 'wrong_src')
+		.throw(TypeError, 'path_wrong_src')
 
 		expect(() =>
 		{
@@ -173,7 +173,7 @@ describe('Machine', () =>
 			// @ts-ignore
 			.path('A', 'B')
 		})
-		.throw(TypeError, 'wrong_dst')
+		.throw(TypeError, 'path_wrong_dst')
 
 		expect(() =>
 		{
@@ -193,7 +193,7 @@ describe('Machine', () =>
 			.path('A', 'B')
 			.paths.rebase(States())
 		})
-		.throw(TypeError, 'wrong_base')
+		.throw(TypeError, 'path_wrong_base')
 
 		expect(() =>
 		{
@@ -205,7 +205,7 @@ describe('Machine', () =>
 			// @ts-ignore
 			const machine = Machine(schema, 'C')
 		})
-		.throw(TypeError, 'wrong_key')
+		.throw(TypeError, 'machine_wrong_init')
 
 		expect(() =>
 		{
@@ -219,6 +219,22 @@ describe('Machine', () =>
 			// @ts-ignore
 			machine.go('C')
 		})
-		.throw(TypeError, 'wrong_key')
+		.throw(TypeError, 'machine_wrong_dst')
+
+		expect(() =>
+		{
+			const schema = Schema()
+			.state('A', () => {})
+			.state('B', () => {})
+			.state('C', () => {})
+			.path('A', 'B')
+
+			const machine = Machine(schema, 'A')
+
+			// @ts-ignore
+			machine.go('C')
+		})
+		.throw(TypeError, 'machine_impossible_path')
+
 	})
 })

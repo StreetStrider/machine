@@ -53,6 +53,10 @@ const
 s_c = s_b.add('c', (c: string) => Boolean(c))
 
 const
+s_void = s_a.add('void')
+s_void.get('void') // $ExpectType State_Dscr<[], void>
+
+const
 p0 = Paths(s_b)
 p0 // $ExpectType Paths<States<{ a: State_Dscr<[], number>; } & { b: State_Dscr<[b: number], string>; }>, Paths_Map_Empty>
 
@@ -90,12 +94,13 @@ const
 schema_1 = schema_0
 .state('a', () => 'A')
 .state('b', (n: number) => Boolean(n))
+.state('c')
 
-schema_1 // $ExpectType Schema<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; }>, Paths<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; }>, Paths_Map_Empty>>
+schema_1 // $ExpectType Schema<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; } & { c: State_Dscr<[], void>; }>, Paths<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; } & { c: State_Dscr<[], void>; }>, Paths_Map_Empty>>
 
 const
 schema_2 = schema_1
 .path('a', 'b')
 .path('b', 'a')
 
-schema_2 // $ExpectType Schema<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; }>, Paths<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; }>, { a: { b: true; }; } & { b: { a: true; }; }>>
+schema_2 // $ExpectType Schema<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; } & { c: State_Dscr<[], void>; }>, Paths<States<{ a: State_Dscr<[], string>; } & { b: State_Dscr<[n: number], boolean>; } & { c: State_Dscr<[], void>; }>, { a: { b: true; }; } & { b: { a: true; }; }>>

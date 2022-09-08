@@ -8,15 +8,21 @@ schema = Schema()
 .state('A', (n: number) => n ** 2)
 .state('B', () => {})
 .state('C', () => {})
+.state('.')
 .path('A', 'B')
 .path('B', 'C')
 .path('C', 'A')
+.path('C', '.')
 
 schema // Schema<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; }>, Paths<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; }>, { A: { B: true; }; } & { B: { C: true; }; } & { C: { A: true; }; }>>
 
 const
 machine = Machine(schema, 'A', 17)
-machine // $ExpectType Machine<Schema<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; }>, Paths<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; }>, { A: { B: true; }; } & { B: { C: true; }; } & { C: { A: true; }; }>>>
+machine // $ExpectType Machine<Schema<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; } & { ".": State_Dscr<[], void>; }>, Paths<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; } & { ".": State_Dscr<[], void>; }>, { A: { B: true; }; } & { B: { C: true; }; } & { C: { A: true; }; } & { C: { ".": true; }; }>>>
+
+const
+machine_void = Machine(schema, '.')
+machine_void // $ExpectType Machine<Schema<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; } & { ".": State_Dscr<[], void>; }>, Paths<States<{ A: State_Dscr<[n: number], number>; } & { B: State_Dscr<[], void>; } & { C: State_Dscr<[], void>; } & { ".": State_Dscr<[], void>; }>, { A: { B: true; }; } & { B: { C: true; }; } & { C: { A: true; }; } & { C: { ".": true; }; }>>>
 
 type M = typeof machine
 
@@ -27,7 +33,7 @@ machine.go('A', 17) // $ExpectType void
 machine.can('A') // $ExpectType boolean
 machine.can('D') // $ExpectError
 
-machine.key   // $ExpectType "A" | "B" | "C"
+machine.key   // $ExpectType "A" | "B" | "C" | "."
 machine.state // $ExpectType number | void
 
 const w1 = machine.when('A', (x) =>

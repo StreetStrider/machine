@@ -33,6 +33,18 @@ export type States <States_Map extends States_Map_Base> =
 		:
 			States<States_Map & { [ key in Key ]: State_Dscr<Args, Target> }>,
 
+	add
+	<
+		Key extends Key_Base,
+	>
+	(key: Key)
+	:
+		Key extends keyof States_Map
+		?
+			never
+		:
+			States<States_Map & { [ key in Key ]: State_Dscr<[], void> }>,
+
 	keys ()
 	: readonly (keyof States_Map)[],
 
@@ -46,6 +58,8 @@ export type States <States_Map extends States_Map_Base> =
 
 }
 
+function Void () {}
+
 export function States (states: States_Map_Base = Object.create(null)): States<States_Map_Empty>
 {
 	const $ =
@@ -58,7 +72,7 @@ export function States (states: States_Map_Base = Object.create(null)): States<S
 
 	function add (
 		key: Key_Base,
-		enter_fn:  (...args: unknown[]) => unknown,
+		enter_fn?:  (...args: unknown[]) => unknown,
 		leave_fn?: () => void
 	)
 	{
@@ -69,7 +83,7 @@ export function States (states: States_Map_Base = Object.create(null)): States<S
 
 		return States({ ...states, [ key ]:
 		{
-			enter: enter_fn,
+			enter: (enter_fn ?? Void),
 			leave: leave_fn,
 		}})
 	}
@@ -236,6 +250,24 @@ export type Schema <S extends States<any>, P extends Paths<S, any>> =
 				>
 			>,
 
+	state
+	<
+		Key extends Key_Base,
+	>
+	(key: Key)
+	:
+		Key extends States_Keys<S>
+		?
+			never
+		:
+			Schema<
+				   States<States_Data<S> & { [ key in Key ]: State_Dscr<[], void> }>,
+				Paths<
+					States<States_Data<S> & { [ key in Key ]: State_Dscr<[], void> }>,
+					Paths_Data<P>
+				>
+			>,
+
 	path
 	<
 		Src extends States_Keys<S>,
@@ -262,9 +294,9 @@ export function Schema <S extends States<any>, P extends Paths<S, any>> (states:
 		path,
 	}
 
-	function state (key: Key_Base, enter_fn: Enter_Fn<unknown[], unknown>, leave_fn?: Leave_Fn)
+	function state (key: Key_Base, enter_fn?: Enter_Fn<unknown[], unknown>, leave_fn?: Leave_Fn)
 	{
-		const states_new = states.add(key, enter_fn, leave_fn)
+		const states_new = states.add(key, (enter_fn as any), leave_fn)
 		const paths_new  = paths.rebase(states_new)
 		return Schema(states_new, paths_new)
 	}

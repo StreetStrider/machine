@@ -13,7 +13,7 @@ describe('Machine', () =>
 		const schema = Schema()
 		.state('init', () => { /* enter init */ }, () => { /* leave init */ })
 		.state('running', (id: number) => ({ id }))
-		.state('stopped', () => {})
+		.state('stopped')
 		.path('init', 'running')
 		.path('running', 'running')
 		.path('running', 'stopped')

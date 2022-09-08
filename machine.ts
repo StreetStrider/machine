@@ -1,5 +1,3 @@
-// TODO: machine final? or explicit end state ($leave)
-// TODO: single arg state.add
 // eslint-disable max-len
 
 import { Key_Base } from './schema'
@@ -68,8 +66,8 @@ export function Machine
 
 	const $ =
 	{
-		key:   null as any,
-		state: null as any,
+		key:   void 0 as any,
+		state: void 0 as any,
 
 		is,
 		must,

@@ -2,11 +2,14 @@
   "version": "0.0.0",
      "name": "machine",
 
+  "description":
+    "strongly typed finite-state machine",
+
   "scripts":
   {
     "test": "npm run ts && npm run dts && npm run unit",
-    "ts":   "tsc",
-    "dts":  "dtslint --expectOnly --localTs ./node_modules/typescript/lib test/",
+      "ts": "tsc",
+     "dts": "dtslint --expectOnly --localTs ./node_modules/typescript/lib test/",
     "unit": "ts-mocha test/*.case.ts"
   },
 

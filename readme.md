@@ -1,6 +1,6 @@
 # machine
 
-My approach on a strongly-typed state machine. Simple design, strong guarantees, type guards and asserts for running machine.
+My approach on a strongly typed finite-state machine. Simple design, strong guarantees, both type guards and asserts for a running machine.
 
 ```ts
 import { Schema }  from 'machine'
@@ -9,7 +9,7 @@ import { Machine } from 'machine'
 const schema = Schema()
 .state('init', () => { /* enter init */ }, () => { /* leave init */ })
 .state('running', (id: number) => ({ id }))
-.state('stopped', () => {})
+.state('stopped')
 .path('init', 'running')
 .path('running', 'running')
 .path('running', 'stopped')
